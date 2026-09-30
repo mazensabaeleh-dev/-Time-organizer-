@@ -1,0 +1,10 @@
+{
+  "name": "مُخططي الذكي - Smart Planner",
+  "description": "تطبيق ذكي يساعد الطلاب على تنظيم وقتهم الدراسي بكفاءة باستخدام الذكاء الاصطناعي لتقسيم المهام وتقديم نصائح مخصصة.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
