@@ -1,47 +1,59 @@
 import { Subject, DailyScheduleEntry, StudyTip } from "../types";
+import { generateLocalSchedule, generateLocalTips } from "../utils/localPlanner";
 
 export const generateSmartSchedule = async (
   availableHours: number,
   subjects: Subject[],
   otherTasks: string[]
 ): Promise<DailyScheduleEntry[]> => {
-  const response = await fetch("/api/schedule/generate", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      availableHours,
-      subjects,
-      otherTasks,
-    }),
-  });
+  try {
+    const response = await fetch("/api/schedule/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        availableHours,
+        subjects,
+        otherTasks,
+      }),
+    });
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || "فشل الاتصال بالخادم لإنشاء الجدول");
+    if (response.ok) {
+      const data = await response.json();
+      if (Array.isArray(data) && data.length > 0) {
+        return data;
+      }
+    }
+  } catch {
+    // If backend endpoint is unavailable (e.g. static GitHub Pages hosting)
+    // fallback gracefully to smart client-side algorithm
   }
 
-  const data = await response.json();
-  return Array.isArray(data) ? data : [];
+  return generateLocalSchedule(availableHours, subjects);
 };
 
 export const fetchStudyTips = async (subjects: Subject[]): Promise<StudyTip[]> => {
-  const response = await fetch("/api/tips/generate", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      subjects,
-    }),
-  });
+  try {
+    const response = await fetch("/api/tips/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        subjects,
+      }),
+    });
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || "فشل توليد النصائح الدراسية");
+    if (response.ok) {
+      const data = await response.json();
+      if (Array.isArray(data) && data.length > 0) {
+        return data;
+      }
+    }
+  } catch {
+    // Static hosting fallback
   }
 
-  const data = await response.json();
-  return Array.isArray(data) ? data : [];
+  return generateLocalTips(subjects);
 };
